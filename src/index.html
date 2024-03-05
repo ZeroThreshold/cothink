@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Whiteboard</title>
+        <meta charset="utf-8" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: "Kalam", cursive;
+            }
+        </style>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            clifford: "#da373d",
+                        },
+                    },
+                },
+            };
+        </script>
+        <link href="./css/main.css" rel="stylesheet" />
+    </head>
+
+    <body>
+        <!---Whiteboard container -!-->
+        <div id="whiteboardContainer"></div>
+
+        <!---Toolbar -!-->
+        <div id="toolbar" class="absolute left-2.5 top-2.5">
+            <div class="btn-group">
+                <button
+                    id="whiteboardLockBtn"
+                    style="background-color: orange"
+                    class="rounded flex items-center justify-center"
+                    title="View and Write"
+                    type="button"
+                >
+                    <i data-lucide="lock" stroke-width="2.5"></i>
+                </button>
+                <button
+                    id="whiteboardUnlockBtn"
+                    title="View Only"
+                    type="button"
+                    class="rounded flex items-center justify-center"
+                >
+                    <i data-lucide="unlock" stroke-width="2.5"></i>
+                </button>
+            </div>
+
+            <div class="btn-group whiteboard-edit-group">
+                <button
+                    id="whiteboardTrashBtn"
+                    title="Clear the whiteboard"
+                    type="button"
+                    class="rounded flex items-center justify-center"
+                >
+                    <i data-lucide="trash" stroke-width="2.5"></i>
+                </button>
+                <button
+                    id="whiteboardTrashBtnConfirm"
+                    style="display: none"
+                    title="Confirm clear..."
+                    type="button"
+                    class="rounded flex items-center justify-center"
+                >
+                    <i data-lucide="check" stroke-width="2.5"></i>
+                </button>
+                <button
+                    id="whiteboardUndoBtn"
+                    title="Undo your last step"
+                    type="button"
+                    class="rounded flex items-center justify-center"
+                >
+                    <i data-lucide="undo-2" stroke-width="2.5"></i>
+                </button>
+                <button
+                    id="whiteboardRedoBtn"
+                    title="Redo your last undo"
+                    type="button"
+                    class="rounded flex items-center justify-center"
+                >
+                    <i data-lucide="redo-2" stroke-width="2.5"></i>
+                </button>
+            </div>
+
+            <div class="btn-group whiteboard-edit-group">
+                <button
+                    tool="mouse"
+                    title="Take the mouse"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="mouse-pointer-2" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="hand"
+                    title="pan the whiteboard"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="hand" aria-hidden="true" stroke-width="2"></i>
+                </button>
+
+                <button
+                    tool="recSelect"
+                    title="Select an area"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="box-select" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="pen"
+                    title="Take the pen"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center active"
+                >
+                    <i data-lucide="pencil" stroke-width="2.5"></i>
+                </button>
+                <button
+                    style="padding-bottom: 8px; padding-top: 6px"
+                    tool="line"
+                    title="draw a line"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="slash" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="rect"
+                    title="draw a rectangle"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="square" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="circle"
+                    title="draw a circle"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="circle" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="eraser"
+                    title="take the eraser"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="eraser" stroke-width="2.5"></i>
+                </button>
+            </div>
+
+            <div class="btn-group whiteboard-edit-group">
+                <button style="width: 190px; cursor: default" class="rounded">
+                    <input
+                        title="Thickness"
+                        id="whiteboardThicknessSlider"
+                        class="w-[130px] h-2 bg-blue-200 cursor-pointer absolute left-[9px] top-4"
+                        type="range"
+                        min="3"
+                        max="50"
+                        value="3"
+                    />
+                    <div
+                        id="whiteboardColorpicker"
+                        class="rounded-full"
+                        style="
+                            position: absolute;
+                            left: 155px;
+                            top: 10px;
+                            width: 26px;
+                            height: 23px;
+                            border: 1px solid darkgrey;
+                        "
+                        data-color="#000000"
+                    ></div>
+                </button>
+            </div>
+
+            <div class="btn-group whiteboard-edit-group">
+                <button
+                    tool="text"
+                    title="write text"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="case-upper" stroke-width="2.5"></i>
+                </button>
+                <button
+                    tool="stickynote"
+                    title="place a sticky note"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="sticky-note" stroke-width="2.5"></i>
+                    <button
+                    id="textboxBackgroundColorPickerBtn"
+                    style="display: none"
+                    title="text background-color"
+                    class="rounded flex items-center justify-center"
+                >
+                    <div
+                        id="textboxBackgroundColorPicker"
+                        style="
+                            width: 26px;
+                            height: 23px;
+                            border-radius: 3px;
+                            border: 1px solid darkgrey;
+                            position: relative;
+                        "
+                        data-color="#f5f587"
+                    ></div>
+            </div>
+
+            <div class="btn-group whiteboard-edit-group">
+                <button
+                    id="addImgToCanvasBtn"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                    title="Upload Image to whiteboard"
+                    type="button"
+                >
+                    <i data-lucide="image-up" stroke-width="2.5"></i>
+                </button>
+
+                <button
+                    style="position: relative"
+                    id="uploadJsonBtn"
+                    title="Load saved JSON to whiteboard"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="file-up" stroke-width="2.5"></i>
+                </button>
+
+                <input style="display: none" id="myFile" type="file" />
+            </div>
+
+            <div class="btn-group">
+                <button
+                    id="saveAsImageBtn"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                    title="Save whiteboard as image"
+                    type="button"
+                >
+                    <i data-lucide="image-down" stroke-width="2.5"></i>
+                </button>
+                <button
+                    style="position: relative"
+                    id="saveAsJSONBtn"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                    title="Save whiteboard as JSON"
+                    type="button"
+                >
+                    <i data-lucide="file-down" stroke-width="2.5"></i>
+                </button>
+
+                <button
+                    id="shareWhiteboardBtn"
+                    title="share whiteboard"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="copy" stroke-width="2.5"></i>
+                </button>
+
+                <button
+                    id="displayWhiteboardInfoBtn"
+                    title="Show whiteboard info"
+                    type="button"
+                    class="whiteboard-tool rounded flex items-center justify-center"
+                >
+                    <i data-lucide="info" stroke-width="2.5"></i>
+                </button>
+            </div>
+
+            <div class="btn-group minGroup">
+                <button
+                    style="width: 100%"
+                    id="minMaxBtn"
+                    title="hide buttons"
+                    type="button"
+                    class="rounded"
+                >
+                    <i
+                        id="minBtn"
+                        style="position: relative; left: -1.5px"
+                        data-lucide="arrow-big-left"
+                        stroke-width="2.5"
+                    ></i>
+                    <i
+                        id="maxBtn"
+                        style="position: relative; left: -1.5px; display: none"
+                        data-lucide="arrow-big-right"
+                        stroke-width="2.5"
+                    ></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="whiteboardInfoContainer">
+            <p><b>Whiteboard information:</b></p>
+            <p># connected users: <i id="connectedUsersCount">0</i></p>
+            <p>Smallest screen resolution: <i id="smallestScreenResolution">Unknown.</i></p>
+            <p># msg. sent to server: <i id="messageSentCount">0</i></p>
+            <p># msg. received from server: <i id="messageReceivedCount">0</i></p>
+        </div>
+
+        <div id="shareWhiteboardDialog" class="displayNone">
+            <div class="shareWhiteboardDialogContent">
+                <div class="flex items-center justify-center flex-col bg-white p-16 rounded gap-3">
+                    <button
+                        id="shareWhiteboardDialogCopyReadOnlyLink"
+                        class="flex items-center justify-center text-white bg-black rounded p-2"
+                    >
+                        <i data-lucide="lock" stroke-width="2.5"></i
+                        ><span>&nbsp;Share read-only link</span>
+                    </button>
+                    <button
+                        class="flex items-center justify-center text-white bg-black rounded p-2 displayNone"
+                        id="shareWhiteboardDialogCopyReadWriteLink"
+                    >
+                        <i data-lucide="unlock" stroke-width="2.5"></i
+                        ><span>&nbsp;Share editable link</span>
+                    </button>
+                    <button
+                        class="shareWhiteboardDialogItem bg-black text-white rounded p-2"
+                        id="shareWhiteboardDialogGoBack"
+                    >
+                        <b>Go back to the whiteboard</b>
+                    </button>
+                    <p
+                        class="shareWhiteboardDialogItem displayNone"
+                        id="shareWhiteboardDialogMessage"
+                    ></p>
+                </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script>
+            lucide.createIcons();
+        </script>
+    </body>
+</html>
